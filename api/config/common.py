@@ -8,6 +8,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Common(Configuration):
+    
+    DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
     INSTALLED_APPS = (
         'django.contrib.admin',
@@ -25,6 +27,8 @@ class Common(Configuration):
 
         # Your apps
         'api.users',
+        'api.feed',
+        'api.nodes',
     )
 
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/

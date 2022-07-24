@@ -5,5 +5,7 @@ from django.contrib import admin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    re_path(r'^api/v1/', include('api.nodes.urls')),
+    re_path(r'^api/v1/', include('api.feed.urls')),
     re_path(r'^api/v1/', include('api.users.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
