@@ -9,14 +9,14 @@ class NodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Node
-        fields = ('created_by', 'name', 'private')
+        fields = ('created_by', 'name', 'private', 'type', 'feed', 'parents', 'nodes')
 
 
 class ListNodeSerializer(serializers.ModelSerializer):
     
         class Meta:
             model = Node
-            fields = ('created_by', 'name', 'private')
+            fields = ('created_by', 'name', 'private', 'type', 'feed', 'parents', 'nodes')
 
 
 class WriteNodeSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class WriteNodeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Node
-        fields = ('created_by', 'name', 'private')
+        fields = ('created_by', 'name', 'private', 'type', 'feed', 'parents')
         read_only_fields = ('created_by',)
         extra_kwargs = {
             'created_by': {'write_only': True}

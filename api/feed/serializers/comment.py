@@ -26,8 +26,15 @@ class WriteCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('created_by', 'content', 'parent')
+        fields = ('created_by', 'feed', 'content', 'parent')
         read_only_fields = ('created_by',)
         extra_kwargs = {
-            'created_by': {'write_only': True}
+            'created_by': {'write_only': True},
+            'feed': {'write_only': True},
         }
+    
+    def validate(self, data):
+        if data['parent']:
+            if data['parent'].feed != data['feed']:
+                raise serializers.ValidationError('Parent comment must belong to the same feed')
+        return data
