@@ -22,8 +22,6 @@ class Node(BaseModel):
     
     content = models.CharField(max_length=200)
 
-    parents = models.ManyToManyField('self', symmetrical=False, blank=True)
-
     type = models.CharField(max_length=200, choices=NodeTypes.choices)
 
     private = models.BooleanField(default=False)
@@ -57,7 +55,7 @@ class ProposedRelationship(BaseModel):
     def save(self, *args, **kwargs):
         if self.from_node == self.to_node:
             raise ValueError('Cannot create relationship between a node and itself')
-        if self.from_node.parents.filter(pk=self.to_node.pk).exists():
+        if self.from_node.proposed_relationships.filter(to_node=self.to_node).exists():
             raise ValueError('Relationship already exists')
         if self.from_node.type == self.to_node.type:
             raise ValueError('Cannot create relationship between same type nodes')

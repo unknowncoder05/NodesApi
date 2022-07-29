@@ -12,8 +12,9 @@ base api. Check out the project's [documentation](http://unknowncoder05.github.i
 # Local Development
 
 Start the dev server for local development:
+
 ```bash
-docker-compose up
+make up
 ```
 
 Run a command inside the docker container:
