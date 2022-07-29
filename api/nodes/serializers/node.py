@@ -43,7 +43,7 @@ class DescribeNodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Node
-        fields = ('created_by', 'name', 'private', 'type', 'feed', 'parents', 'children')
+        fields = ('created_by', 'content', 'private', 'type', 'feed', 'parents', 'children')
     
     def get_parents(self, obj):
         return obj.to_node.all()
@@ -56,7 +56,7 @@ class ListNodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Node
-        fields = ('created_by', 'name', 'private', 'type', 'feed')
+        fields = ('created_by', 'content', 'private', 'type', 'feed')
 
 
 class DescribeProposedRelationshipSerializer(serializers.ModelSerializer):
@@ -73,24 +73,27 @@ class DescribeProposedRelationshipSerializer(serializers.ModelSerializer):
 class WriteNodeSerializer(serializers.ModelSerializer):
 
     created_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    parents = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all())
-    children = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all())
+    parents = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all(), required=False, write_only=True)
+    children = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all(), required=False, write_only=True)
 
     class Meta:
         model = Node
-        fields = ('created_by', 'name', 'private', 'type', 'feed', 'parents', 'children')
+        fields = ('created_by', 'content', 'private', 'type', 'feed', 'parents', 'children')
         read_only_fields = ('created_by',)
         extra_kwargs = {
-            'created_by': {'write_only': True}
+            'created_by': {'write_only': True},
         }
 
     def validate(self, data):
-        for parent in data['parents']:
-            if parent.type == data['type']:
-                raise serializers.ValidationError('Node type must be different from parent type')
-        for child in data['children']:
-            if child.type == data['type']:
-                raise serializers.ValidationError('Node type must be different from child type')
+        if 'parents' in data:
+            for parent in data['parents']:
+                if parent.type == data['type']:
+                    raise serializers.ValidationError('Node type must be different from parent type')
+        
+        if 'children' in data:
+            for child in data['children']:
+                if child.type == data['type']:
+                    raise serializers.ValidationError('Node type must be different from child type')
         return data
 
     def create(self, validated_data):

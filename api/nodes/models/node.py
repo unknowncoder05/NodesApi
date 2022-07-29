@@ -31,12 +31,6 @@ class Node(BaseModel):
     def __str__(self):
         return f'{self.content} {self.created_by} {self.type}'
     
-    def save(self, *args, **kwargs):
-        for parent in self.parents.all():
-            if parent.type == self.type:
-                raise ValueError('Node type must be different from parent type')
-        super().save(*args, **kwargs)
-
 
 class ProposedRelationship(BaseModel):
     
@@ -61,7 +55,3 @@ class ProposedRelationship(BaseModel):
             raise ValueError('Cannot create relationship between same type nodes')
         super().save(*args, **kwargs)
         
-    def on_accept(self):
-        self.from_node.parents.add(self.to_node)
-        self.from_node.save()
-        self.delete()
