@@ -43,7 +43,7 @@ class DescribeNodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Node
-        fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents', 'children')
+        fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents', 'children', 'parents_count', 'children_count')
     
     def get_parents(self, obj):
         return obj.to_node.all()
@@ -54,18 +54,9 @@ class DescribeNodeSerializer(serializers.ModelSerializer):
 
 class ListNodeSerializer(serializers.ModelSerializer):
 
-    parents_count = serializers.SerializerMethodField()
-    children_count = serializers.SerializerMethodField()
-
     class Meta:
         model = Node
         fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents_count', 'children_count')
-    
-    def get_parents_count(self, obj):
-        return obj.to_node.count()
-    
-    def get_children_count(self, obj):
-        return obj.from_node.count()
 
 
 class DescribeProposedRelationshipSerializer(serializers.ModelSerializer):

@@ -31,6 +31,14 @@ class Node(BaseModel):
     def __str__(self):
         return f'{self.content} {self.created_by} {self.type}'
     
+    @property
+    def parents_count(self):
+        return self.to_node.count()
+    
+    @property
+    def children_count(self):
+        return self.from_node.count()
+    
 
 class ProposedRelationship(BaseModel):
     
