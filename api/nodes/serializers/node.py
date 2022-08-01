@@ -17,7 +17,7 @@ class WriteProposedRelationshipSerializer(serializers.ModelSerializer):
         to_node = data['to_node']
         if from_node == to_node:
             raise ValueError('Cannot create relationship between a node and itself')
-        if from_node.proposed_relationships.filter(to_node=to_node).exists():
+        if from_node.from_nodes.filter(to_node=to_node).exists():
             raise ValueError('Relationship already exists')
         if from_node.type == to_node.type:
             raise ValueError('Cannot create relationship between same type nodes')
@@ -34,22 +34,27 @@ class ReadProposedRelationshipSerializer(serializers.ModelSerializer):
         fields = ('id', 'from_node', 'to_node', 'created_by')
 
 
+class ReadProposedFromRelationshipSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ProposedRelationship
+        fields = ('id', 'from_node', 'created_by')
+
+
+class ReadProposedToRelationshipSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ProposedRelationship
+        fields = ('id', 'to_node', 'created_by')
+
+
 class DescribeNodeSerializer(serializers.ModelSerializer):
 
     created_by = UserSerializer(read_only=True)
-    parents = serializers.SerializerMethodField()
-    children = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Node
-        fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents', 'children', 'parents_count', 'children_count')
-    
-    def get_parents(self, obj):
-        return obj.to_node.all()
-    
-    def get_children(self, obj):
-        return obj.from_node.all()
+        fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents_count', 'children_count')
 
 
 class ListNodeSerializer(serializers.ModelSerializer):
@@ -114,8 +119,9 @@ class WriteNodeSerializer(serializers.ModelSerializer):
             self.create_relationship(parent, node)
     
     def create_relationship(self, from_node, to_node):
-        WriteProposedRelationshipSerializer(data={
-            'from_node': from_node,
-            'to_node': to_node,
-            'created_by': self.context['request'].user
-        }).create()
+        serializer = WriteProposedRelationshipSerializer(data={
+            'from_node': from_node.id,
+            'to_node': to_node.id,
+        }, context=self.context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
