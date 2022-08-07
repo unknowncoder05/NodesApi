@@ -24,6 +24,9 @@ mnm:# Make and migrate
 me:# Make empty migration
 	docker-compose -f $(DOCKER_COMPOSE_FILE) run --rm web python manage.py makemigrations --empty $(app)
 
+admin:
+	docker-compose -f $(DOCKER_COMPOSE_FILE) run --rm web  python manage.py createsuperuser
+
 c:
 	docker-compose config
 

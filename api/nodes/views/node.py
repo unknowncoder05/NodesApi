@@ -43,10 +43,11 @@ class NodeRelationshipsViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def get_queryset(self, **kwargs):
-        if 'from_node' in kwargs:
-            self.node = get_object_or_404(Node, id=kwargs['node'])
-            return ProposedRelationship.objects.filter(from_node=self.node)
-        if 'to_node' in kwargs:
-            self.node = get_object_or_404(Node, id=kwargs['node'])
-            return ProposedRelationship.objects.filter(to_node=self.node)
+        if self.action in ['list']:
+            if 'from_node' in self.request.query_params:
+                node = get_object_or_404(Node, id=self.request.query_params['from_node'])
+                return node.from_nodes.filter()
+            if 'to_node' in self.request.query_params:
+                node = get_object_or_404(Node, id=self.request.query_params['to_node'])
+                return node.to_nodes.filter()
         return ProposedRelationship.objects.all()
