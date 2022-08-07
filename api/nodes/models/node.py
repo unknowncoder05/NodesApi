@@ -45,14 +45,12 @@ class ProposedRelationship(BaseModel):
     created_by = models.ForeignKey(User, related_name='proposed_relationships', on_delete=models.CASCADE)
     
     def __str__(self):
-        return f'{self.from_node} {self.type} {self.to_node}'
+        return f'{self.from_node} {self.to_node}'
 
     def save(self, *args, **kwargs):
         if self.from_node == self.to_node:
             raise ValueError('Cannot create relationship between a node and itself')
         if self.from_node.from_nodes.filter(to_node=self.to_node).exists():
             raise ValueError('Relationship already exists')
-        if self.from_node.type == self.to_node.type:
-            raise ValueError('Cannot create relationship between same type nodes')
         super().save(*args, **kwargs)
         

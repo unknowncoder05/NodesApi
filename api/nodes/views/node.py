@@ -8,7 +8,9 @@ from django.db.models import Q
 
 from api.nodes.models import Node, ProposedRelationship
 from api.nodes.serializers import (
-    ListNodeSerializer, DescribeProposedRelationshipSerializer, WriteProposedRelationshipSerializer, DescribeNodeSerializer, WriteNodeSerializer
+    ListNodeSerializer, ReadProposedFromRelationshipSerializer,
+    ReadProposedToRelationshipSerializer, DescribeProposedRelationshipSerializer,
+    WriteProposedRelationshipSerializer, DescribeNodeSerializer, WriteNodeSerializer,
 )
 
 
@@ -33,11 +35,18 @@ class NodeRelationshipsViewSet(viewsets.ModelViewSet):
             return WriteProposedRelationshipSerializer
         if self.action == 'retrieve':
             return DescribeProposedRelationshipSerializer
+        if self.action in ['list']:
+            if self.request.query_params.get('from_node'):
+                return ReadProposedFromRelationshipSerializer
+            if self.request.query_params.get('to_node'):
+                return ReadProposedToRelationshipSerializer
         return super().get_serializer_class()
 
     def get_queryset(self, **kwargs):
-        print("kwargs", kwargs)
-        if 'node' in kwargs:
+        if 'from_node' in kwargs:
             self.node = get_object_or_404(Node, id=kwargs['node'])
-            return ProposedRelationship.objects.filter(Q(from_node=self.node) | Q(to_node=self.node))
+            return ProposedRelationship.objects.filter(from_node=self.node)
+        if 'to_node' in kwargs:
+            self.node = get_object_or_404(Node, id=kwargs['node'])
+            return ProposedRelationship.objects.filter(to_node=self.node)
         return ProposedRelationship.objects.all()

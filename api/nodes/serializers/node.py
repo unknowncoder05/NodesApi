@@ -32,20 +32,6 @@ class ReadProposedRelationshipSerializer(serializers.ModelSerializer):
         fields = ('id', 'from_node', 'to_node', 'created_by')
 
 
-class ReadProposedFromRelationshipSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = ProposedRelationship
-        fields = ('id', 'from_node', 'created_by')
-
-
-class ReadProposedToRelationshipSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = ProposedRelationship
-        fields = ('id', 'to_node', 'created_by')
-
-
 class DescribeNodeSerializer(serializers.ModelSerializer):
 
     created_by = UserSerializer(read_only=True)
@@ -60,6 +46,24 @@ class ListNodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Node
         fields = ('id', 'created_by', 'content', 'private', 'feed', 'parents_count', 'children_count')
+
+
+class ReadProposedFromRelationshipSerializer(serializers.ModelSerializer):
+    
+    from_node = ListNodeSerializer()
+
+    class Meta:
+        model = ProposedRelationship
+        fields = ('id', 'from_node', 'created_by')
+
+
+class ReadProposedToRelationshipSerializer(serializers.ModelSerializer):
+    
+    to_node = ListNodeSerializer()
+    
+    class Meta:
+        model = ProposedRelationship
+        fields = ('id', 'to_node', 'created_by')
 
 
 class DescribeProposedRelationshipSerializer(serializers.ModelSerializer):
