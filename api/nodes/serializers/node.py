@@ -19,8 +19,6 @@ class WriteProposedRelationshipSerializer(serializers.ModelSerializer):
             raise ValueError('Cannot create relationship between a node and itself')
         if from_node.from_nodes.filter(to_node=to_node).exists():
             raise ValueError('Relationship already exists')
-        if from_node.type == to_node.type:
-            raise ValueError('Cannot create relationship between same type nodes')
         return data
 
     def create(self, validated_data):
@@ -54,14 +52,14 @@ class DescribeNodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Node
-        fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents_count', 'children_count')
+        fields = ('id', 'created_by', 'content', 'private', 'feed', 'parents_count', 'children_count')
 
 
 class ListNodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Node
-        fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents_count', 'children_count')
+        fields = ('id', 'created_by', 'content', 'private', 'feed', 'parents_count', 'children_count')
 
 
 class DescribeProposedRelationshipSerializer(serializers.ModelSerializer):
@@ -83,22 +81,13 @@ class WriteNodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Node
-        fields = ('id', 'created_by', 'content', 'private', 'type', 'feed', 'parents', 'children')
+        fields = ('id', 'created_by', 'content', 'private', 'feed', 'parents', 'children')
         read_only_fields = ('created_by',)
         extra_kwargs = {
             'created_by': {'write_only': True},
         }
 
     def validate(self, data):
-        if 'parents' in data:
-            for parent in data['parents']:
-                if parent.type == data['type']:
-                    raise serializers.ValidationError('Node type must be different from parent type')
-        
-        if 'children' in data:
-            for child in data['children']:
-                if child.type == data['type']:
-                    raise serializers.ValidationError('Node type must be different from child type')
         return data
 
     def create(self, validated_data):

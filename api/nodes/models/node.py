@@ -7,11 +7,6 @@ from api.users.models import User
 from api.feed.models import Feed
 
 
-class NodeTypes(models.TextChoices):
-    QUESTION = 'QUESTION', 'q'
-    ANSWER = 'ANSWER', 'a'
-
-
 class Node(BaseModel):
     
 
@@ -22,14 +17,12 @@ class Node(BaseModel):
     
     content = models.CharField(max_length=200)
 
-    type = models.CharField(max_length=200, choices=NodeTypes.choices)
-
     private = models.BooleanField(default=False)
 
     feed = models.ForeignKey(Feed, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.content} {self.created_by} {self.type}'
+        return f'{self.content} {self.created_by}'
     
     @property
     def parents_count(self):
