@@ -1,3 +1,4 @@
+from cmath import log
 from rest_framework import serializers
 from api.users.serializers import UserSerializer
 
@@ -80,12 +81,12 @@ class DescribeProposedRelationshipSerializer(serializers.ModelSerializer):
 class WriteNodeSerializer(serializers.ModelSerializer):
 
     created_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    parents = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all(), required=False, write_only=True)
-    children = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all(), required=False, write_only=True)
+    from_nodes = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all(), required=False, write_only=True)
+    to_nodes = serializers.PrimaryKeyRelatedField(many=True, queryset=Node.objects.all(), required=False, write_only=True)
 
     class Meta:
         model = Node
-        fields = ('id', 'created_by', 'content', 'private', 'feed', 'parents', 'children')
+        fields = ('id', 'created_by', 'content', 'private', 'feed', 'from_nodes', 'to_nodes')
         read_only_fields = ('created_by',)
         extra_kwargs = {
             'created_by': {'write_only': True},
@@ -95,21 +96,30 @@ class WriteNodeSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        parents = validated_data.pop('parents', [])
-        children = validated_data.pop('children', [])
+        from_nodes = validated_data.pop('from_nodes', [])
+        to_nodes = validated_data.pop('to_nodes', [])
         node = super().create(validated_data)
 
-        self.create_children(node, children)
-        self.create_parents(node, parents)
+        self.create_to(node, to_nodes)
+        self.create_from(node, from_nodes)
         return node
-
-    def create_children(self, node, children):
-        for child in children:
-            self.create_relationship(node, child)
     
-    def create_parents(self, node, parents):
-        for parent in parents:
-            self.create_relationship(parent, node)
+    def update(self, instance, validated_data):
+        from_nodes = validated_data.pop('from_nodes', [])
+        to_nodes = validated_data.pop('to_nodes', [])
+        super().update(instance, validated_data)
+
+        self.create_to(instance, to_nodes)
+        self.create_from(instance, from_nodes)
+        return instance
+
+    def create_to(self, node, to_nodes):
+        for to_node in to_nodes:
+            self.create_relationship(node, to_node)
+    
+    def create_from(self, node, from_nodes):
+        for from_node in from_nodes:
+            self.create_relationship(from_node, node)
     
     def create_relationship(self, from_node, to_node):
         serializer = WriteProposedRelationshipSerializer(data={
